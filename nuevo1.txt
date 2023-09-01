@@ -1,0 +1,219 @@
+-- 1.Devuelve todas las películas
+
+SELECT MOVIE_NAME FROM PUBLIC.MOVIES;
+
+-- 2. Devuelve todos los géneros existentes
+
+SELECT GENRE_NAME FROM GENRES;
+
+-- 3. Devuelve la lista de todos los estudios de grabación que estén activos
+
+SELECT STUDIO_NAME FROM PUBLIC.STUDIOS WHERE STUDIO_ACTIVE = 1;
+
+-- 4. Devuelve una lista de los 20 últimos miembros en anotarse al videoclub
+
+SELECT * FROM MEMBERS ORDER BY MEMBER_DISCHARGE_DATE DESC LIMIT 20
+
+-- 5. Devuelve las 20 duraciones de películas más frecuentes, ordenados de mayor a menor.
+
+SELECT MOVIE_DURATION, COUNT(*) AS FRECUENCY FROM MOVIES GROUP BY MOVIE_DURATION ORDER BY FRECUENCY DESC LIMIT 20
+
+-- 6. Devuelve las películas del año 2000 en adelante que empiecen por la letra A.
+
+SELECT * FROM MOVIES WHERE MOVIE_LAUNCH_DATE > 2000 AND MOVIE_NAME LIKE 'A%'
+
+-- 7. Devuelve los actores nacidos un mes de Junio
+
+SELECT * FROM ACTORS WHERE ACTOR_BIRTH_DATE LIKE '%-06-%'
+
+-- 8. Devuelve los actores nacidos cualquier mes que no sea Junio y que sigan vivos.
+
+SELECT * FROM ACTORS WHERE MONTH (ACTOR_BIRTH_DATE) <> 06 AND ACTOR_DEAD_DATE IS NULL
+
+-- 9. Devuelve el nombre y la edad de todos los directores menores o iguales de 50 años que estén vivos
+
+SELECT DIRECTOR_NAME,DATEDIFF(YEAR, DIRECTOR_BIRTH_DATE, TODAY()) AS "AGE" FROM DIRECTORS WHERE DATEDIFF(YEAR, DIRECTOR_BIRTH_DATE, TODAY()) YEAR(DIRECTOR_BIRTH_DATE) <> 1973 AND DIRECTOR_DEAD_DATE IS NOT NULL
+
+-- 10. Devuelve el nombre y la edad de todos los actores menores de 50 años que hayan fallecido
+
+SELECT ACTOR_NAME, ACTOR_BIRTH_DATE FROM ACTORS WHERE YEAR(ACTOR_BIRTH_DATE) > 1973 AND ACTOR_DEAD_DATE IS NOT NULL
+
+-- 11. Devuelve el nombre de todos los directores menores o iguales de 40 años que estén vivos
+
+SELECT DIRECTOR_NAME FROM DIRECTORS WHERE YEAR(DIRECTOR_BIRTH_DATE) >= 1983 AND DIRECTOR_DEAD_DATE IS NULL ORDER BY DIRECTOR_NAME 
+
+-- 12. Indica la edad media de los directores vivos
+
+SELECT AVG(DATEDIFF(YEAR,DIRECTOR_BIRTH_DATE,  CURRENT_DATE) / 365)
+AS AVERAGE_AGE FROM DIRECTORS WHERE DIRECTOR_DEAD_DATE IS NULL 
+
+-- 13. Indica la edad media de los actores que han fallecido
+
+SELECT AVG(DATEDIFF(YEAR,ACTOR_BIRTH_DATE, ACTOR_DEAD_DATE))
+AS "AVERAGE_AGE" FROM ACTORS WHERE ACTOR_DEAD_DATE IS NOT NULL 
+
+-- 14. Devuelve el nombre de todas las películas y el nombre del estudio que las ha realizado
+
+SELECT MOVIE_NAME, STUDIO_NAME FROM MOVIES M JOIN STUDIOS S ON M.STUDIO_ID = S.STUDIO_ID
+
+-- 15. Devuelve los miembros que alquilaron al menos una película entre el año 2010 y el 2015
+
+SELECT M.MEMBER_NAME
+FROM MEMBERS M
+INNER JOIN MEMBERS_MOVIE_RENTAL MR
+ON M.MEMBER_ID = MR.MEMBER_ID
+WHERE YEAR(MR.MEMBER_DATE) BETWEEN 2010 AND 2015
+GROUP BY M.MEMBER_NAME
+
+-- 16. Devuelve cuantas películas hay de cada país
+
+SELECT
+    n.NATIONALITY_NAME AS COUNTRY,
+    COUNT(m.MOVIE_ID) AS MOVIES
+FROM
+    NATIONALITIES n
+LEFT JOIN MOVIES m ON
+    n.NATIONALITY_ID = m.NATIONALITY_ID
+GROUP BY
+    n.NATIONALITY_NAME
+ORDER BY 
+    COUNT(m.MOVIE_ID) 
+DESC;
+-- 17. Devuelve todas las películas que hay de género documental
+
+SELECT * FROM MOVIES INNER JOIN GENRES ON MOVIES.GENRE_ID = GENRES.GENRE_ID WHERE GENRES.GENRE_NAME = "Documentary"
+
+-- 18. Devuelve todas las películas creadas por directores nacidos a partir de 1980 y que todavía están vivos
+
+SELECT MOVIE_NAME FROM MOVIES M JOIN DIRECTORS D ON M.DIRECTOR_ID = D.DIRECTOR_ID WHERE YEAR(D.DIRECTOR_BIRTH_DATE) >=1980 AND D.DIRECTOR_DEAD_DATE IS NULL
+
+-- 19. Indica si hay alguna coincidencia de nacimiento de ciudad (y si las hay, indicarlas) entre los miembros del videoclub y los directores.
+
+SELECT MEMBER_NAME, MEMBER_TOWN FROM MEMBERS M JOIN DIRECTORS D ON M.MEMBER_TOWN = D.DIRECTOR_BIRTH_PLACE 
+
+-- 20. Devuelve el nombre y el año de todas las películas que han sido producidas por un estudio que actualmente no esté activo
+
+SELECT MOVIE_NAME, MOVIE_LAUNCH_DATE FROM MOVIES M JOIN STUDIOS S ON M.STUDIO_ID = S.STUDIO_ID WHERE STUDIO_ACTIVE IS NOT TRUE
+
+-- 21. Devuelve una lista de las últimas 10 películas que se han alquilado
+
+SELECT * FROM MOVIES M JOIN PUBLIC.MEMBERS_MOVIE_RENTAL R ON M.MOVIE_ID = R.MOVIE_ID ORDER BY MEMBER_RENTAL_DATE DESC LIMIT 10
+
+-- 22. Indica cuántas películas ha realizado cada director antes de cumplir 41 años
+
+SELECT  COUNT (*) AS MOVIE_COUNT,
+FROM
+MOVIES M
+INNER JOIN DIRECTORS D ON
+M.DIRECTOR_ID  = D.DIRECTOR_ID
+WHERE
+DATEDIFF(Y, D.DIRECTOR_BIRTH_DATE, M.MOVIE_LAUNCH_DATE
+
+-- 23. Indica cuál es la media de duración de las películas de cada director
+
+SELECT AVG(MOVIE_DURATION) FROM MOVIES M JOIN DIRECTORS D ON M.DIRECTOR_ID = D.DIRECTOR_ID 
+
+-- 24. Indica cuál es el nombre y la duración mínima de las películas que han sido alquiladas en los últimos 2 años por los miembros del videoclub (La "fecha de ejecución" en este script es el 25-01-2019)
+
+SELECT MOVIES.MOVIE_NAME, MIN(MOVIES.MOVIE_DURATION) FROM MOVIES
+
+
+-- 25. Indica el número de películas que hayan hecho los directores durante las décadas de los 60, 70 y 80 que contengan la palabra "The" en cualquier parte del título
+
+SELECT d.director_name, COUNT(*) AS numero_peliculas FROM directors d JOIN movies m ON d.director_id = m.director_id WHERE UPPER(m.movie_name)  LIKE '%THE%'
+
+AND MOVIE_LAUNCH_DATE >= DATE '1960-01-01' AND MOVIE_LAUNCH_DATE < DATE '1989-12-31'
+
+GROUP BY d.director_name;
+
+-- 26. Lista nombre, nacionalidad y director de todas las películas
+
+SELECT
+MOVIE_NAME AS 'movie'
+DIRECTOR_NAME AS 'name'
+DIRECTOR_BIRTH_PLACE AS 'place'
+FROM MOVIES M
+RIGHT JOIN DIRECTORS D
+ON M.DIRECTOR_ID = D.DIRECTOR_ID 
+
+-- 27. Muestra las películas con los actores que han participado en cada una de ellas
+
+-- 28. Indica cual es el nombre del director del que más películas se han alquilado
+
+SELECT D.DIRECTOR_NAME, CAOUNT( MMR.MEMBER_MOVIE_RENTAL_ID) AS "RENTED_MOVIES" FROM DIRECTORS D
+INNER JOIN MOVIES M 
+ON M.DIRECTOR_ID = D.DIRECTOR_ID
+JOIN PUBLIC.MEMBERS_MOVIE_RENTAL MMR ON
+MMR.MOVIE_ID = M.MOVIE_ID
+GROUP BY 
+D.RENTED_MOVIES DESC LIMIT
+
+-- 29. Indica cuantos premios han ganado cada uno de los estudios con las películas que han creado
+
+SELECT
+S.STUDIO_NAME, SUM(A.AWARD_WIN)
+FROM
+STUDIOS S
+INNER JOIN
+MOVIES M ON
+M.STUDIO_ID = S.STUDIO_ID 
+INNER JOIN
+AWARDS A ON
+M.MOVIE_ID = A.MOVIE_ID
+GROUP BY
+S.STUDIO_NAME
+
+
+
+-- 30. Indica el número de premios a los que estuvo nominado un actor, pero que no ha conseguido (Si una película está nominada a un premio, su actor también lo está)
+
+SELECT
+
+    AC.ACTOR_NAME,
+
+    SUM(A.AWARD_ALMOST_WIN) AS AWARD_NOMINATION
+
+FROM
+
+    PUBLIC.MOVIES M
+
+INNER JOIN PUBLIC.AWARDS A ON
+
+    A.MOVIE_ID = M.MOVIE_ID
+
+INNER JOIN PUBLIC.MOVIES_ACTORS MA ON
+
+    MA.MOVIE_ID = M.MOVIE_ID
+
+INNER JOIN PUBLIC.ACTORS AC ON
+
+    AC.ACTOR_ID = MA.ACTOR_ID
+
+GROUP BY
+
+    AC.ACTOR_NAME
+
+-- 31. Indica cuantos actores y directores hicieron películas para los estudios no activos
+
+SELECT
+	COUNT(DISTINCT M.DIRECTOR_ID) AS DIRECTOR_NUMBER,
+	COUNT(DISTINCT MA.ACTOR_ID) AS ACTOR_NUMBER
+FROM
+	PUBLIC.STUDIOS S
+	INNER JOIN
+	PUBLIC.MOVIES  M 
+	ON 
+	M.STUDIO_ID = S.STUDIO_ID 
+	INNER JOIN
+	PUBLIC.MOVIES_ACTORS MA
+	ON
+	MA.MOVIE_ID = M.MOVIE_ID 
+WHERE
+	S.STUDIO_ACTIVE = FALSE
+
+
+-- 32. Indica el nombre, ciudad, y teléfono de todos los miembros del videoclub que hayan alquilado películas que hayan sido nominadas a más de 150 premios y ganaran menos de 50
+
+-- 33. Comprueba si hay errores en la BD entre las películas y directores (un director fallecido en el 76 no puede dirigir una película en el 88)
+
+-- 34. Utilizando la información de la sentencia anterior, modifica la fecha de defunción a un año más tarde del estreno de la película (mediante sentencia SQL)
