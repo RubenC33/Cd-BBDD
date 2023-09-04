@@ -217,3 +217,99 @@ WHERE
 -- 33. Comprueba si hay errores en la BD entre las películas y directores (un director fallecido en el 76 no puede dirigir una película en el 88)
 
 -- 34. Utilizando la información de la sentencia anterior, modifica la fecha de defunción a un año más tarde del estreno de la película (mediante sentencia SQL)
+
+-- 37. Indica cuál fue la primera película que alquilaron los miembros del videoclub cuyos teléfonos tengan como último dígito el ID de alguna nacionalidad
+SELECT
+    MOVIERENTALS.MOVIE_NAME,
+    MOVIERENTALS.MEMBER_NAME
+FROM
+    (
+    SELECT
+        MO.MOVIE_NAME,
+        MMR.MOVIE_ID,
+        MMR.MEMBER_ID,
+        MMR.MEMBER_RENTAL_DATE,
+        M.MEMBER_NAME,
+        TO_NUMBER(SUBSTRING(M.MEMBER_PHONE FROM LENGTH(MEMBER_PHONE))) AS "LAST_DIGIT"
+    FROM
+        MOVIES MO
+    INNER JOIN
+    MEMBERS_MOVIE_RENTAL MMR
+    ON
+        MO.MOVIE_ID = MMR.MOVIE_ID
+    INNER JOIN MEMBERS M ON
+        MMR.MEMBER_ID = M.MEMBER_ID
+    WHERE
+        TO_NUMBER(SUBSTRING(M.MEMBER_PHONE FROM LENGTH(MEMBER_PHONE))) IN (
+        SELECT
+            NATIONALITY_ID
+        FROM
+            NATIONALITIES
+
+ 
+
+)
+    GROUP BY
+        MO.MOVIE_NAME,
+        MMR.MOVIE_ID,
+        MMR.MEMBER_ID,
+        MMR.MEMBER_RENTAL_DATE,
+        M.MEMBER_NAME,
+        LAST_DIGIT
+    ORDER BY
+        M.MEMBER_NAME
+
+ 
+
+) MOVIERENTALS
+INNER JOIN
+
+    (
+    SELECT
+        MEMBER_ID,
+        MIN(MEMBER_RENTAL_DATE) AS "FIRST_RENTAL"
+    FROM
+        (
+        SELECT
+            MO.MOVIE_NAME,
+            MMR.MOVIE_ID,
+            MMR.MEMBER_ID,
+            MMR.MEMBER_RENTAL_DATE,
+            M.MEMBER_NAME,
+            TO_NUMBER(SUBSTRING(M.MEMBER_PHONE FROM LENGTH(MEMBER_PHONE))) AS "LAST_DIGIT"
+        FROM
+            MOVIES MO
+        INNER JOIN
+    MEMBERS_MOVIE_RENTAL MMR
+    ON
+            MO.MOVIE_ID = MMR.MOVIE_ID
+        INNER JOIN MEMBERS M ON
+            MMR.MEMBER_ID = M.MEMBER_ID
+        WHERE
+            TO_NUMBER(SUBSTRING(M.MEMBER_PHONE FROM LENGTH(MEMBER_PHONE))) IN (
+            SELECT
+                NATIONALITY_ID
+            FROM
+                NATIONALITIES
+
+ 
+
+)
+        GROUP BY
+            MO.MOVIE_NAME,
+            MMR.MOVIE_ID,
+            MMR.MEMBER_ID,
+            MMR.MEMBER_RENTAL_DATE,
+            M.MEMBER_NAME,
+            LAST_DIGIT
+        ORDER BY
+            M.MEMBER_NAME
+    )
+    GROUP BY
+        MEMBER_ID) FIRSTRENTALS ON
+    MOVIERENTALS.MEMBER_ID = FIRSTRENTALS.MEMBER_ID AND MOVIERENTALS.MEMBER_RENTAL_DATE = FIRSTRENTALS.FIRST_RENTAL
+GROUP BY
+    MOVIERENTALS.MOVIE_NAME,
+    MOVIERENTALS.MEMBER_NAME
+	
+	FIN DE LOS EJERCICIOS
